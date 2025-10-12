@@ -1,4 +1,5 @@
 import { Usuario, IUsuario } from '../models/usuario';
+import { generateToken, generateRefreshToken, verifyToken } from '../auth/token';
 
 export class UserService {
     async createUser(user: Partial<IUsuario>): Promise<IUsuario | null> {
@@ -40,6 +41,27 @@ export class UserService {
         return await Usuario.findOneAndDelete({ username });
     }
 
+    async loginUser(username: string, password: string): Promise<IUsuario | null> {
+      try {
+        console.log('loginUser en UserService con:', username, password);
+        const User = await Usuario.findOne({ username });
+        console.log('Usuario encontrado en loginUser:', User);
+        if (!User) {
+          return null;
+        }
+      
+        const isPasswordValid = await User.comparePassword(password);
+        if (!isPasswordValid) {
+          console.log('Contraseña inválida para el usuario:', username);
+          return null;
+      }
+      
+      
+      return User;
+    } catch (error) {
+      throw new Error((error as Error).message);
+    }
+  }
 
 
 }

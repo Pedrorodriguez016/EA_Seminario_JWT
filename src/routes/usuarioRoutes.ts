@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as usuarioController from '../controller/usuarioController';
-import { authenticateToken } from '../auth/middleware';
+import { authenticateToken, authenticateRefreshToken } from '../auth/middleware';
 
 const router = Router();
 
@@ -230,18 +230,7 @@ router.delete('/:username', authenticateToken, usuarioController.deleteUserByUse
  *         description: Credenciales inválidas
  */
 router.post('/login', usuarioController.login);
-/**
- * @swagger
- * /user/logout:
- *   post:
- *     summary: Logout de usuario
- *     tags:
- *       - Usuarios
- *     responses:
- *       200:
- *         description: Logout exitoso, cookie eliminada
- */
-router.post('/logout', usuarioController.logout);
+
 
 /**
  * @swagger
@@ -270,7 +259,7 @@ router.post('/logout', usuarioController.logout);
  *       401:
  *         description: No se pudo refrescar el token (token inválido o expirado)
  */
-router.post('/refresh', usuarioController.refreshAccessToken);
+router.post('/refresh',authenticateRefreshToken, usuarioController.refreshAccessToken);
 
 
 export default router;

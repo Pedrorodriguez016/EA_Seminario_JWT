@@ -70,29 +70,15 @@ export async function createUser(req: Request, res: Response): Promise<Response>
 
   export async function updateUserById(req: Request, res: Response): Promise<Response> {
   console.log('actualizar usuario por id');
-   try {
-    const userFromToken = (req as any).user;
-
-    if (!userFromToken) {
-      return res.status(401).json({ message: "Token requerido" });
-    }
-
+  try {
     const { id } = req.params;
-    console.log('id param:', id); 
-    console.log('id from token:', userFromToken.payload.id);
-    
-    if (userFromToken.payload.id !== id) {
-      return res.status(403).json({ message: "No tienes permisos para modificar a otro usuario" });
-    }
-
     const userData: Partial<IUsuario> = req.body;
     const updatedUser = await userService.updateUserById(id, userData);
     console.log('Usuario actualizado:', updatedUser);
     if (!updatedUser) {
       return res.status(404).json({ message: "USUARIO NO ENCONTRADO" });
     }
-
-
+  
     return res.status(200).json({
       message: "Usuario actualizado correctamente",
       user: updatedUser,
@@ -104,28 +90,13 @@ export async function createUser(req: Request, res: Response): Promise<Response>
 
   export async function updateUserByUsername(req: Request, res: Response): Promise<Response> {
   try {
-    const userFromToken = (req as any).user;
-
-    if (!userFromToken) {
-      return res.status(401).json({ message: "Token requerido" });
-    }
-
-    const { username } = req.params;
-    console.log('username param:', username); 
-    console.log('user from token:', userFromToken.usuario.username);
-  
-    if (userFromToken.usuario !== username) {
-      return res.status(403).json({ message: "No tienes permisos para modificar a otro usuario" });
-    }
-
     const userData: Partial<IUsuario> = req.body;
+    const username = req.params.username;
     const updatedUser = await userService.updateUserByUsername(username, userData);
 
     if (!updatedUser) {
       return res.status(404).json({ message: "USUARIO NO ENCONTRADO" });
     }
-
-
 
     return res.status(200).json({
       message: "Usuario actualizado correctamente",
@@ -170,27 +141,24 @@ export async function createUser(req: Request, res: Response): Promise<Response>
 
   export async function login(req: Request, res: Response): Promise<Response> {
   try {
-    const { user, password } = req.body;
-
-    if (!user|| !password) {
-      return res.status(400).json({ error: "Faltan credenciales" });
+    const { username, password } = req.body;
+    console.log('login usuario', username, password);
+    const User= await userService.loginUser(username, password);
+    console.log('Usuario en login:', User);
+    if (!User) {
+      return res.status(401).json({ error: "Credenciales inválidas" });
     }
-
-    // Service que valida usuario + password
-    const User = await userService.getUserByUsername(user);
-    if (!user) {
-      return res.status(401).json({ error: "Usuario no encontrado" });
-    }
-    
     // Generar token
-    
     const token = await generateToken(User!, res);
     const refreshToken = await generateRefreshToken(User!, res);
     return res.status(200).json({
       User,
       message: "LOGIN EXITOSO",
+      token,
+      refreshToken
       
     });
+    console.log('token generado:', User, token, refreshToken);
   } catch (error) {
     return res.status(500).json({ error: "Error en el login" });
   }
@@ -198,36 +166,17 @@ export async function createUser(req: Request, res: Response): Promise<Response>
 }
 export async function refreshAccessToken(req: Request, res: Response): Promise<Response> {
   try {
-    const refreshToken = req.cookies.refreshToken;
-
-    if (!refreshToken) {
-      return res.status(401).json({ message: "No se encontró el refresh token" });
-    }
-
-   const decoded = verifyToken(refreshToken) as any;
-    const userId = decoded?.payload?.id;
-    if (!userId) {
-      console.log("Refresh token inválido o expirado:", decoded);
-      return res.status(403).json({ message: "Refresh token inválido o expirado" });
-    }
-
-    const user = await userService.getUserById(decoded.id);
+    const id = (req as any).user.payload.id;
+    const user = await userService.getUserById(id);
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
-    generateToken(user, res);
-    return res.status(200).json({ message: "Access token renovado correctamente" });
+    const newToken = generateToken(user, res);
+    return res.status(200).json({
+      message: "Nuevo token generado",
+      token: newToken
+    });
   } catch (error) {
-    console.error("Error al refrescar token:", error);
-    return res.status(500).json({ message: "Error interno al refrescar el token" });
-  }
+    return res.status(500).json({ error: "Error al generar nuevo token" });
+  } 
 }
-export async function logout(req: Request, res: Response): Promise<Response> {
-  res.clearCookie('authToken', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
-  });
-  
-  return res.status(200).json({ message: "Logout exitoso" });
-  }

@@ -17,7 +17,6 @@ const port= 3001;
 app.use(cors({
     origin: 'http://localhost:4200', // Reemplaza con el origen de tu frontend
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true // Permite el envío de cookies
 }))
 
 
