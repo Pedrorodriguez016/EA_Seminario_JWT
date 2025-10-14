@@ -79,10 +79,9 @@ export async function createUser(req: Request, res: Response): Promise<Response>
       return res.status(404).json({ message: "USUARIO NO ENCONTRADO" });
     }
   
-    return res.status(200).json({
-      message: "Usuario actualizado correctamente",
-      user: updatedUser,
-    });
+    return res.status(200).json(
+     updatedUser
+    );
   } catch (error) {
     return res.status(400).json({ message: (error as Error).message });
   }
