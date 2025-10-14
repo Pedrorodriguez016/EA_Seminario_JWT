@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "./token";
+import { verifyToken, verifyRefreshToken } from "./token";
 
 export function authenticateToken(req: Request, res: Response, next: NextFunction) {
   
@@ -36,7 +36,7 @@ export function authenticateRefreshToken(req: Request, res: Response, next: Next
       return res.status(401).json({ error: "Refresh token requerido" });
     }
 
-    const decoded = verifyToken(refreshToken);
+    const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
       return res.status(403).json({ error: "Refresh token inválido o expirado" });
     }

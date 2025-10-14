@@ -1,5 +1,6 @@
 import { Usuario, IUsuario } from '../models/usuario';
 import { generateToken, generateRefreshToken, verifyToken } from '../auth/token';
+import bcrypt from 'bcryptjs';
 
 export class UserService {
     async createUser(user: Partial<IUsuario>): Promise<IUsuario | null> {
@@ -23,9 +24,12 @@ export class UserService {
       return await Usuario.findOne({ username });
     }
 
-    async updateUserById(id: string, user: Partial<IUsuario>): Promise<IUsuario | null> {
-      return await Usuario.findByIdAndUpdate(id, user, { new: true });
-    }
+    async updateUserById(id: string, userData: Partial<IUsuario>): Promise<IUsuario | null> {
+    const user = await Usuario.findById(id);
+    if (!user) return null;
+    Object.assign(user, userData);
+    return user.save();
+ }
 
     async updateUserByUsername(username: string, user: Partial<IUsuario>): Promise<IUsuario | null> {
       

@@ -99,7 +99,6 @@ export async function createUser(req: Request, res: Response): Promise<Response>
     }
 
     return res.status(200).json({
-      message: "Usuario actualizado correctamente",
       user: updatedUser,
     
     });
