@@ -30,20 +30,25 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 }
 export function authenticateRefreshToken(req: Request, res: Response, next: NextFunction) {
   try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res.status(401).json({ error: "Refresh token requerido" });
+    const { refreshToken, userId } = req.body;
+    if (!refreshToken || !userId) {
+      return res.status(401).json({ error: "Refresh token y userId requeridos" });
     }
 
     const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
       return res.status(403).json({ error: "Refresh token inválido o expirado" });
     }
-    
     (req as any).user = decoded;
 
+  const refreshtokenUserid : string = (decoded as any).payload.id;
+    // Verificar que el userId del body coincide con el del token
+    if (refreshtokenUserid !== userId) {
+      return res.status(403).json({ error: "El userId no coincide con el del token" });
+    }
+
     console.log("Refresh token verificado correctamente:", decoded);
+
     next();
   } catch (error) {
     console.error("Error al verificar refresh token:", error);
