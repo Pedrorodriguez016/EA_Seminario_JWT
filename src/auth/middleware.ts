@@ -14,20 +14,20 @@ export function authenticateToken(req: Request, res: Response, next: NextFunctio
 
   const decoded = verifyToken(token);
   if (!decoded) {
-    return res.status(403).json({ error: "Token inválido o expirado" });
+    return res.status(401).json({ error: "Token inválido o expirado" });
   }
+  
 
-  (req as any).user = decoded;
+  const rol : string = (decoded as any).payload.rol;
 
-  const tokenUserid : string = (decoded as any).payload.id;
-  const requestUserid : string = req.params.id;
-  if (requestUserid && tokenUserid !== requestUserid) {
-    return res.status(403).json({ error: "No autorizado para acceder a este recurso" });
+  if (rol !== 'admin') {
+    return res.status(403).json({ error: "Se requieren privilegios de administrador" });
   }
 
   console.log("Token verificado, usuario:", decoded);
   next();
 }
+
 export function authenticateRefreshToken(req: Request, res: Response, next: NextFunction) {
   try {
     const { refreshToken, userId } = req.body;
@@ -37,7 +37,7 @@ export function authenticateRefreshToken(req: Request, res: Response, next: Next
 
     const decoded = verifyRefreshToken(refreshToken);
     if (!decoded) {
-      return res.status(403).json({ error: "Refresh token inválido o expirado" });
+      return res.status(401).json({ error: "Refresh token inválido o expirado" });
     }
     (req as any).user = decoded;
 

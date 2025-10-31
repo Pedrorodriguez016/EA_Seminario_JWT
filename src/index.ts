@@ -25,8 +25,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.json() as express.RequestHandler); 
+app.use(express.json() as express.RequestHandler);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/user', usuarioRoutes);
+app.use('/api/event', eventoRoutes);
 
 //////////////////////AQUI CONECTAMOS A LA BASE DE DATOS//////////////////////
 mongoose.connect('mongodb://localhost:27017/BBDD')
@@ -41,5 +43,4 @@ mongoose.connect('mongodb://localhost:27017/BBDD')
     });
 
 
-app.use('/api/user', usuarioRoutes);
-app.use('/api/event', eventoRoutes);
+

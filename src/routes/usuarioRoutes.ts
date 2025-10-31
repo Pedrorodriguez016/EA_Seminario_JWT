@@ -4,6 +4,7 @@ import { authenticateToken, authenticateRefreshToken } from '../auth/middleware'
 
 const router = Router();
 
+
 /**
  * @swagger
  * components:
@@ -14,6 +15,8 @@ const router = Router();
  *         - username
  *         - gmail
  *         - password
+ *         - birthday
+ *         - rol
  *       properties:
  *         id:
  *           type: string
@@ -27,11 +30,14 @@ const router = Router();
  *         birthday:
  *           type: string
  *           format: date
+ *         rol:
+ *           type: string
  *       example:
  *         username: nombreUsuario
  *         gmail: primeraParteCorreo@example.com
  *         password: 123456
  *         birthday: 2000-05-21
+ *         rol: user
  *       securitySchemes:
  *         bearerAuth:
  *          type: http
@@ -167,15 +173,17 @@ router.put('/:id', authenticateToken, usuarioController.updateUserById);
 router.put('/:username', authenticateToken, usuarioController.updateUserByUsername);
 
 
+
+
 /**
  * @swagger
- * /user/{username}:
+ * /user/{id}:
  *   delete:
- *     summary: Eliminar un usuario por nombre
+ *     summary: Eliminar un usuario por id
  *     tags: [Usuarios]
  *     parameters:
  *       - in: path
- *         name: username
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
@@ -187,7 +195,7 @@ router.put('/:username', authenticateToken, usuarioController.updateUserByUserna
  *             schema:
  *               $ref: '#/components/schemas/Usuario'
  */
-router.delete('/:username', authenticateToken, usuarioController.deleteUserByUsername);
+router.delete('/:id', authenticateToken, usuarioController.deleteUserById);
 
 /**
  * @swagger

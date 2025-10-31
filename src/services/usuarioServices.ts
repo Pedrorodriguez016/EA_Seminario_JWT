@@ -37,11 +37,12 @@ export class UserService {
     }
 
     async deleteUserById(id: string): Promise<IUsuario | null> {
-
+      console.log('deleteUserById en UserService con id:', id); 
       return await Usuario.findByIdAndDelete(id);
     }
 
     async deleteUserByUsername(username: string): Promise<IUsuario | null> {
+      
         return await Usuario.findOneAndDelete({ username });
     }
 
